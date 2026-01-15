@@ -1,0 +1,8 @@
+- name: Install docker
+  hosts: fuzzers
+  roles:
+    - apt_https
+    - docker_install
+    - common_packages_install
+    - move_files
+    - add_aliases

@@ -1,0 +1,52 @@
+* Host Requirements
+The local host must have [[https://docs.ansible.com/ansible/latest/index.html][Ansible]] installed and support SSH.
+
+* Server-setup
+This section will cover the server setup which must be done before proceeding to other parts. 
+
+** Server Requirements
+The OS of the server must be Debian 12. The server must support SSH. Assumption for the following sections is that you have a working SSH-connection setup to the server.
+
+** Populate Playbook
+Navigate to ~ansible/inventory/hosts~ and fill the IP-address with that of the server.
+
+** Create Forks
+You need to create forks of the [[targets]] and [[https://github.com/marco0711/API-schemas][schemas]]. This is to support mutation testing. Despite whether you use mutation testing or not, this is mandatory.
+
+*** Schemas
+There is only one repository for the schemas.
+- https://github.com/marco0711/API-schemas
+
+*** Targets
+There are four targets with two repositories. You need to fork both of them repositories.
+- https://github.com/marco0711/EMB
+- https://github.com/SeUniVr/api_case_studies
+
+** Populate .env-file
+Navigate to ~.env~ and fill ~API_REPO_URL~ and ~FORK_OWNER~.
+
+** Run Ansible
+You can now run Ansible to setup the environment to the server with the command ~ansible-playbook -i ansible/inventory/hosts ansible/playbook.yaml~. Note that due to the path, the working directory must be at the root of the project or modify the path. This will take a moment.
+
+* Using the environment
+Now that environment has been moved to the server, you can SSH to the server: ~ssh root@IP-ADDRESS~
+
+** Initialize
+First of all you should initialize the testing environment. That is simply done by running ~init~. There is a minor bug that might state that a ~env_cache_file.env~ doesn't exist. This can be ignored.
+
+The environment will ask you for the git-branch of the target. Without mutation testing this can be left empty which will default to ~master~. Note that with mutation testing you need to create the same branch for all the target-repositories.
+
+Following is a question of API branch. This means the git-branch of the schema-files. This defaults to ~main~ and only has to be changed in case of API-schema mutation testing.
+
+Now the fuzzer will ensure a clean testing environment which will take a couple of minutes. You might bump into a Docker-bug about coroutines. In this case simply rerun the ~init~ command as long as there is need.
+
+When the initialization is ready, the environment shows the running targets, fuzzers and API schemas.
+
+** Running Fuzzers
+There are two options; either you run one fuzzer or you run all fuzzers. Both of the options will run testing against all fuzzers.
+
+- ~test_single~ will present you the available fuzzers from which you choose the desired fuzzer
+- ~test_all~ will start fuzzing with all fuzzers one by one
+
+** Collecting Outputs
+Once the testing have finished, you can find the results from ~$HOME/outputs~. You probably want to create an archive of it and then move it to localhost for further inspection via ~scp~ or similar tool.

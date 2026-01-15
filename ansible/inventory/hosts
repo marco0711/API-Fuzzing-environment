@@ -1,0 +1,7 @@
+fuzzers:
+  hosts:
+    fuzzer_1:
+      ansible_host: 
+      ansible_python_interpreter: auto_silent
+  vars:
+    ansible_user: root

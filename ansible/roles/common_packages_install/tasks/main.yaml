@@ -1,0 +1,7 @@
+- name: Install common packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - git

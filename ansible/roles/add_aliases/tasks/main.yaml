@@ -1,0 +1,53 @@
+- name: Source functions
+  lineinfile:
+    path: /root/.bashrc
+    line: "source $HOME/build_environment.sh"
+    state: present
+
+- name: Add reset all
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias ra='reset_all'"
+    state: present
+    
+- name: Add reset targets
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias rt='reset_targets'"
+    state: present
+
+- name: Add init
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias in='init'"
+    state: present
+
+- name: Add single target with all fuzzers
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias tss='test_single_target_with_single_fuzzer'"
+    state: present
+
+- name: Add test all targets with all fuzzers
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias taa='test_all_targets_with_all_fuzzers'"
+    state: present
+
+- name: Add info
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias info='print_info'"
+    state: present
+
+- name: Add help
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias help='print_help'"
+    state: present
+
+- name: Add archive
+  lineinfile:
+    path: /root/.bashrc
+    line: "alias ar='archive'"
+    state: present

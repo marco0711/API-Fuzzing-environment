@@ -1,0 +1,202 @@
+---
+services:
+
+######################################################
+##################### TARGETS ########################
+######################################################
+
+    target-scs:
+        build:
+            context: targets/scs
+            dockerfile: Dockerfile
+            args:
+                TARGET_BRANCH: ${TARGET_BRANCH}
+                FORK_OWNER: ${FORK_OWNER}
+        container_name: target-scs
+        volumes:
+            - "${CODE_COVERAGE_PATH}/target-scs:${CONTAINER_OUTPUTS}"
+        networks:
+            - fuzzing_network
+        restart: always
+
+    target-ncs:
+        build:
+            context: targets/ncs
+            dockerfile: Dockerfile
+            args:
+                TARGET_BRANCH: ${TARGET_BRANCH}
+                FORK_OWNER: ${FORK_OWNER}
+        container_name: target-ncs
+        volumes:
+            - "${CODE_COVERAGE_PATH}/target-ncs:${CONTAINER_OUTPUTS}"
+        networks:
+            - fuzzing_network
+        restart: always
+
+    target-streaming:
+        build:
+            context: targets/cs03_streaming
+            dockerfile: Dockerfile
+            args:
+                TARGET_BRANCH: ${TARGET_BRANCH}
+                FORK_OWNER: ${FORK_OWNER}
+        container_name: target-streaming
+        volumes:
+            - "${CODE_COVERAGE_PATH}/target-streaming:${CONTAINER_OUTPUTS}"
+        networks:
+            - fuzzing_network
+            - streaming_network
+        restart: always
+        depends_on:
+            - db-streaming
+        environment:
+            MYSQL_HOST: db-streaming
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: live-streaming
+
+    target-petclinic:
+        build:
+            context: targets/cs04_petclinic
+            dockerfile: Dockerfile
+            args:
+                TARGET_BRANCH: ${TARGET_BRANCH}
+                FORK_OWNER: ${FORK_OWNER}
+        container_name: target-petclinic
+        volumes:
+            - "${CODE_COVERAGE_PATH}/target-petclinic:${CONTAINER_OUTPUTS}"
+        networks:
+            - fuzzing_network
+            - petclinic_network
+        restart: always
+        depends_on:
+            - db-petclinic
+        environment:
+            MYSQL_HOST: db-petclinic
+            MYSQL_DATABASE: petclinic
+            MYSQL_ROOT_PASSWORD: petclinic
+
+######################################################
+#################### /TARGETS ########################
+######################################################
+
+
+
+######################################################
+#################### DATABASES #######################
+######################################################
+
+    db-streaming:
+        image: mysql:9.3
+        container_name: db-streaming
+        volumes:
+            - ${PWD}/sql_init_files/streaming.sql:/docker-entrypoint-initdb.d/init.sql
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: live-streaming
+        networks:
+            - streaming_network
+
+    db-petclinic:
+        image: mysql:9.3
+        container_name: db-petclinic
+        volumes:
+            - ${PWD}/sql_init_files/petclinic.sql:/docker-entrypoint-initdb.d/initDB.sql
+            - ${PWD}/sql_init_files/populate_petclinic.sql:/docker-entrypoint-initdb.d/populateDB.sql
+        environment:
+            MYSQL_DATABASE: petclinic
+            MYSQL_ROOT_PASSWORD: petclinic
+        networks:
+            - petclinic_network
+
+######################################################
+#################### /DATABASES ######################
+######################################################
+
+
+
+######################################################
+#################### FUZZERS #########################
+######################################################
+
+    marker:
+        build:
+            context: fuzzers/marker
+            dockerfile: Dockerfile
+        container_name: fuzzer-marker
+        volumes:
+            - "${FUZZER_REPORT_PATH}/marker:${CONTAINER_OUTPUTS}"
+            - "${HOST_SCHEMA_DIR}:${FUZZER_SCHEMA_DIR}"
+        networks:
+            - fuzzing_network
+        entrypoint: $FUZZER_DEFAULT_ENTRYPOINT
+
+    cats:
+        build:
+            context: fuzzers/cats
+            dockerfile: Dockerfile
+        container_name: fuzzer-cats
+        volumes:
+            - "${FUZZER_REPORT_PATH}/cats:${CONTAINER_OUTPUTS}"
+            - "${HOST_SCHEMA_DIR}:${FUZZER_SCHEMA_DIR}"
+        networks:
+            - fuzzing_network
+        entrypoint: $FUZZER_DEFAULT_ENTRYPOINT
+
+    evomaster:
+        build:
+            context: fuzzers/evomaster
+            dockerfile: Dockerfile
+        container_name: fuzzer-evomaster
+        volumes:
+            - "${FUZZER_REPORT_PATH}/evomaster:${CONTAINER_OUTPUTS}"
+            - "${HOST_SCHEMA_DIR}:${FUZZER_SCHEMA_DIR}"
+        networks:
+            - fuzzing_network
+        entrypoint: $FUZZER_DEFAULT_ENTRYPOINT
+
+    restler:
+        build:
+            context: fuzzers/restler
+            dockerfile: Dockerfile
+        container_name: fuzzer-restler
+        volumes:
+            - "${FUZZER_REPORT_PATH}/restler/FuzzLean:${CONTAINER_OUTPUTS}"
+            - "${FUZZER_REPORT_PATH}/restler/Fuzz:${CONTAINER_OUTPUTS}"
+            - "${HOST_SCHEMA_DIR}:${FUZZER_SCHEMA_DIR}"
+        networks:
+            - fuzzing_network
+        entrypoint: $FUZZER_DEFAULT_ENTRYPOINT
+
+    schemathesis:
+        build:
+            context: fuzzers/schemathesis
+            dockerfile: Dockerfile
+        container_name: fuzzer-schemathesis
+        volumes:
+            - "${FUZZER_REPORT_PATH}/schemathesis:${CONTAINER_OUTPUTS}"
+            - "${HOST_SCHEMA_DIR}:${FUZZER_SCHEMA_DIR}"
+        networks:
+            - fuzzing_network
+        entrypoint: $FUZZER_DEFAULT_ENTRYPOINT
+
+######################################################
+#################### /FUZZERS ########################
+######################################################
+
+
+
+######################################################
+#################### NETWORKS ########################
+######################################################
+
+networks:
+  fuzzing_network:
+      driver: bridge
+  streaming_network:
+      driver: bridge
+  petclinic_network:
+      driver: bridge
+      
+######################################################
+#################### /NETWORKS #######################
+######################################################

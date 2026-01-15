@@ -1,0 +1,45 @@
+- name: Move Docker files to host
+  ansible.builtin.copy:
+    force: true
+    src: ./../docker
+    dest: /root/
+  tags:
+  - files
+
+- name: Move env-file
+  ansible.builtin.copy:
+    force: false
+    src: ./../.env
+    dest: /root/.env
+  tags:
+  - files
+
+- name: Move build script
+  ansible.builtin.copy:
+    force: true
+    src: ./../build_environment.sh
+    dest: /root/build_environment.sh
+  tags:
+  - files
+  - scripts
+
+- name: Move other script
+  ansible.builtin.copy:
+    force: true
+    src: ./../scripts
+    dest: /root/
+  tags:
+  - files
+  - scripts
+
+- name: Set buid script to executable
+  file:
+    path: /root/build_environment.sh
+    mode: '0755'
+    state: file
+
+- name: Set buid script to helpers
+  file:
+    path: /root/scripts/utils.sh
+    mode: '0755'
+    state: file
