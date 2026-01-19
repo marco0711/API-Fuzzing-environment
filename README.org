@@ -11,7 +11,7 @@ The OS of the server must be Debian 12. The server must support SSH. Assumption 
 Navigate to ~ansible/inventory/hosts~ and fill the IP-address with that of the server.
 
 ** Create Forks
-You need to create forks of the [[targets]] and [[https://github.com/marco0711/API-schemas][schemas]]. This is to support mutation testing. Despite whether you use mutation testing or not, this is mandatory.
+You need to create forks of the [[https://github.com/marco0711/API-Fuzzing-environment/blob/master/README.org#targets][targets]] and [[https://github.com/marco0711/API-Fuzzing-environment/blob/master/README.org#schemas][schemas]]. This is to support mutation testing. Despite whether you use mutation testing or not, this is mandatory.
 
 *** Schemas
 There is only one repository for the schemas.
